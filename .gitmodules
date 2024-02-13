@@ -1,0 +1,4 @@
+[submodule "linux"]
+	path = linux
+	url = https://gem5.googlesource.com/arm/linux
+	branch = gem5/v4.15
