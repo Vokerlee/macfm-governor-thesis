@@ -32,5 +32,6 @@ fi
 echo "Start installation..."
 
 $(echo $SHELL) ${installation_script}
+$(echo $SHELL) ${script_path}/gs_utils.sh
 
 echo_green "Success!"
