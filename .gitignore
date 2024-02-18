@@ -1,6 +1,7 @@
 # Project-specific folders
 build
 fs_images
+binaries
 
 # Prerequisites
 *.d
