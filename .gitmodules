@@ -1,8 +1,8 @@
-[submodule "linux"]
-	path = linux
-	url = https://gem5.googlesource.com/arm/linux
-	branch = gem5/v4.15
 [submodule "gem5"]
 	path = gem5
 	url = https://github.com/gem5/gem5.git
 	branch = stable
+[submodule "linux-6.6-lts"]
+	path = linux-6.6-lts
+	url = https://github.com/torvalds/linux.git
+	branch = ffc253263a1375a65fa6c9f62a893e9767fbebfa
