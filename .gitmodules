@@ -2,7 +2,7 @@
 	path = gem5
 	url = https://github.com/gem5/gem5.git
 	branch = stable
-[submodule "linux-6.6-lts"]
-	path = linux-6.6-lts
+[submodule "linux-6.1-lts"]
+	path = linux-6.1-lts
 	url = https://github.com/torvalds/linux.git
-	branch = ffc253263a1375a65fa6c9f62a893e9767fbebfa
+	branch = 830b3c6
