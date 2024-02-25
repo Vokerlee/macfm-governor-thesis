@@ -42,10 +42,10 @@ index 000000000000..a39571ce0a2b
 +obj-y += clk-gem5-energy-ctrl.o
 diff --git a/drivers/clk/gem5/clk-gem5-energy-ctrl.c b/drivers/clk/gem5/clk-gem5-energy-ctrl.c
 new file mode 100644
-index 000000000000..3b2bd560c654
+index 000000000000..ffd8dc397e15
 --- /dev/null
 +++ b/drivers/clk/gem5/clk-gem5-energy-ctrl.c
-@@ -0,0 +1,417 @@
+@@ -0,0 +1,420 @@
 +/*
 + * Copyright (C) 2013-2014,2016 ARM Limited
 + * Copyright (C) 2013 Linaro
@@ -94,6 +94,8 @@ index 000000000000..3b2bd560c654
 +
 +#define TIME_OUT			100
 +#define GEM5_MAX_NUM_DOMAINS		32
++
++#define GEM5_CLOCK_NAME_LEN		32
 +
 +struct clk_energy_ctrl_opp_data {
 +	u32 *freqs;
@@ -163,13 +165,13 @@ index 000000000000..3b2bd560c654
 +
 +	if (!clk_energy_ctrl_initialized(clk_ectrl)) {
 +		pr_err("%s: clock \"%s\" is not initialized\n",
-+			__func__, hw->init->name);
++			__func__, clk_hw_get_name(hw));
 +		return -EIO;
 +	}
 +
 +	if (!clk_ectrl->data.opp.freqs) {
 +		pr_err("%s: not populated clock \"%s\" frequencies\n",
-+			__func__, hw->init->name);
++			__func__, clk_hw_get_name(hw));
 +		return -EIO;
 +	}
 +
@@ -201,13 +203,13 @@ index 000000000000..3b2bd560c654
 +
 +	if (!clk_energy_ctrl_initialized(clk_ectrl)) {
 +		pr_err("%s: clock \"%s\" is not initialized\n",
-+			__func__, hw->init->name);
++			__func__, clk_hw_get_name(hw));
 +		return -EIO;
 +	}
 +
 +	if (!clk_ectrl->data.opp.freqs) {
 +		pr_err("%s: not populated clock \"%s\" frequencies\n",
-+			__func__, hw->init->name);
++			__func__, clk_hw_get_name(hw));
 +		return -EIO;
 +	}
 +
@@ -411,7 +413,7 @@ index 000000000000..3b2bd560c654
 +	bool dvfs_handler_status;
 +	int domain_id;
 +	int domain_index;
-+	char name[16];
++	char name[GEM5_CLOCK_NAME_LEN + 1];
 +
 +	void __iomem *baseaddr;
 +	struct clk *clk;
@@ -450,16 +452,66 @@ index 000000000000..3b2bd560c654
 +		base_data.domain_index = domain_index;
 +		base_data.baseaddr = baseaddr;
 +
-+		snprintf(name, sizeof(name), "domain.%d", domain_id);
++		snprintf(name, sizeof(name), "clk-gem5-domain.%d", domain_id);
 +
 +		clk = clk_register_energy_ctrl(name, &base_data);
 +		if (IS_ERR_OR_NULL(clk)) {
-+			pr_err("failed registering clock with domain-id = %d\n",
-+				domain_id);
++			pr_err("failed registering clock %s\n", name);
 +			continue;
 +		}
++
++		clk_register_clkdev(clk, NULL, name);
 +
 +		pr_info("clock \"%s\" is successfully initialized\n", name);
 +	}
 +}
 +CLK_OF_DECLARE(energy_ctrl, "arm,gem5-energy-ctrl", gem5_clk_of_register_energy_ctrl);
+diff --git a/include/linux/clk-gem5-energy-ctrl.h b/include/linux/clk-gem5-energy-ctrl.h
+new file mode 100644
+index 000000000000..83ec07129384
+--- /dev/null
++++ b/include/linux/clk-gem5-energy-ctrl.h
+@@ -0,0 +1,43 @@
++/*
++ * Copyright (C) 2013-2014,2016 ARM Limited
++ * Copyright (C) 2013 Linaro
++ * Copyright (C) 2024 Glaz Roman
++ *
++ * Authors: Akash Bagdia <Akash.bagdia@arm.com>
++ *          Vasileios Spiliopoulos <vasileios.spiliopoulos@arm.com>
++ *          Sascha Bischoff <sascha.bischoff@arm.com>
++ *          Glaz Roman <vokerlee@gmail.com>
++ * (code adapted from clk-vexpress-spc.c)
++ *
++ * This file is licensed under the terms of the GNU General Public
++ * License version 2. This program is licensed "as is" without any
++ * warranty of any kind, whether express or implied.
++ */
++
++/* External interface for cpufreq and devfreq driver for adjusting OPPs of ClockDomains in Gem5 */
++
++#include <linux/clk.h>
++#include <linux/err.h>
++#include <linux/types.h>
++#include <asm-generic/errno-base.h>
++
++#if defined(CONFIG_CLK_GEM5_ENERGY_CTRL)
++
++int clk_energy_ctrl_get_opp_table(struct clk *clk, u32 **freq_table, u32 **volt_table);
++u32 clk_energy_ctrl_get_trans_latency(struct clk *clk);
++
++#else
++
++static inline
++int clk_energy_ctrl_get_opp_table(struct clk *clk, u32 **freq_table, u32 **volt_table)
++{
++        return -EOPNOTSUPP;
++}
++
++static inline
++u32 clk_energy_ctrl_get_trans_latency(struct clk *clk)
++{
++        return -EOPNOTSUPP;
++}
++
++#endif
