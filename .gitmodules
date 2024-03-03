@@ -1,8 +1,8 @@
+[submodule "linux"]
+	path = linux
+	url = https://github.com/Vokerlee/linux-6.1-arm-gem5
+	branch = linux-6.1-gem5
 [submodule "gem5"]
 	path = gem5
-	url = https://github.com/gem5/gem5.git
-	branch = stable
-[submodule "linux-6.1-lts"]
-	path = linux-6.1-lts
-	url = https://github.com/torvalds/linux.git
-	branch = 830b3c6
+	url = https://github.com/Vokerlee/gem5-arm-dev
+	branch = arm_dev
