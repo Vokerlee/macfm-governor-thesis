@@ -9,7 +9,7 @@ cpu0_min_freq_path="/sys/devices/system/cpu/cpufreq/policy0/scaling_min_freq"
 IFS=' ' read -r -a pmu_array <<< "$pmu_list"
 n_pmus="${#pmu_array[@]}"
 
-cmd_launch="timeout --signal=USR1 0.60 $pmu_perf_program $n_pmus $pmu_list "$@""
+cmd_launch="timeout --signal=USR1 1.1 $pmu_perf_program $n_pmus $pmu_list "$@""
 
 IFS=' ' read -r -a cpu0_freqs <<< "$(cat $cpu0_freqs_path)"
 freqs="${cpu0_freqs[@]}"

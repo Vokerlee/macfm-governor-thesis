@@ -1,10 +1,15 @@
 #include "pmu_perf.hpp"
 
+#include <unistd.h>
 #include <cstdlib>
 #include <cerrno>
 #include <iostream>
 #include <sys/wait.h>
 #include <sys/types.h>
+
+// Amount of time when PMU is not collected due to benchmark is not
+// stabilized yet
+static constexpr size_t N_USEC_TO_WAIT = 300000;
 
 dev_ctl::Events events_collector;
 int pid_benchmark = -1;
@@ -76,6 +81,8 @@ int main(int argc, char *argv[])
 
     // std::cerr << "DEBUG: " << "launched \"" << argv[2 + n_events] <<
     //     "\" with pid = " << pid_benchmark << std::endl;
+
+    usleep(N_USEC_TO_WAIT);
 
     events_collector.add_events(pid_benchmark, events);
     events_collector.enable_collection();

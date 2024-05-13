@@ -5,7 +5,7 @@
 #define ARRAY_SIZE (1 << ARRAY_SIZE_LOG2)
 
 #ifndef N_ITERS
-#define N_ITERS (1 << 21)
+#define N_ITERS (1 << 30)
 #endif
 
 #ifndef SHIFT_LOG2
