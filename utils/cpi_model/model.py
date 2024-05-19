@@ -49,6 +49,33 @@ def get_dfs_from_file(filename: str):
 
     return benchmarks, dfs
 
+def get_avg_pmu(df, pmu_field):
+    return np.mean(df[pmu_field].to_numpy())
+
+def get_cpi_model_params(l2pi_values, l3pi_values, linear_coeffs, benchmarks):
+    assert(len(l2pi_values) == len(l3pi_values))
+    assert(len(l2pi_values) == len(linear_coeffs))
+
+    hsv = plt.get_cmap('hsv')
+    colors = hsv(l3pi_values / np.max(l3pi_values))
+
+    figure = plt.figure(figsize=(FIGURE_XSIZE, FIGURE_YSIZE), facecolor=BACKGROUND_RGB)
+    axes = figure.add_subplot(projection='3d')
+    # set_axis_properties(axes)
+
+    linear_reg = LinearRegression(fit_intercept=False).fit(
+        np.swapaxes(np.array([l2pi_values - l3pi_values, l3pi_values]), 0, 1), linear_coeffs)
+    print(linear_reg.coef_)
+
+    for i in range(len(benchmarks)):
+        axes.scatter(l2pi_values[i] - l3pi_values[i], l3pi_values[i], linear_coeffs[i], label=benchmarks[i], color=colors[i])
+
+    X, Y = np.meshgrid(l2pi_values - l3pi_values, l3pi_values)
+    axes.plot_wireframe(X, Y, linear_reg.coef_[0] * X + linear_reg.coef_[1] * Y)
+
+    plt.legend()
+    plt.show()
+
 def main(args):
     benchmarks, dfs = get_dfs_from_file(args.file)
 
@@ -57,10 +84,15 @@ def main(args):
     axes = figure.add_subplot(gs[0, 0])
     set_axis_properties(axes)
 
-    hsv = plt.get_cmap('hsv')
-    colors = hsv(np.linspace(0, 0.9, len(benchmarks)))
-
     linear_coeffs = []
+    l3pi_values = []
+    l2pi_values = []
+
+    for i in range(len(benchmarks)):
+        l3pi_values.append(get_avg_pmu(dfs[benchmarks[i]], "l3pi"))
+        l2pi_values.append(get_avg_pmu(dfs[benchmarks[i]], "l2pi"))
+    hsv = plt.get_cmap('hsv')
+    colors = hsv(np.array(l2pi_values) / np.max(l2pi_values) - np.array(l3pi_values) / np.max(l2pi_values))
 
     for i in range(len(benchmarks)):
         bencmark_name = benchmarks[i].split("/")[-1]
@@ -79,7 +111,8 @@ def main(args):
         axes.plot(cpufreq_to_zero, linear_reg.predict(cpufreq_to_zero.reshape(-1, 1)),
                   color=colors[i], marker='', linestyle='--')
 
-    print(linear_coeffs)
+    get_cpi_model_params(np.array(l2pi_values), np.array(l3pi_values),
+                         np.array(linear_coeffs), np.array(benchmarks))
 
     axes.set_xlabel('CPU frequency, kHz')
     axes.set_ylabel('CPI')

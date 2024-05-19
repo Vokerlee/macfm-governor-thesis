@@ -22,15 +22,12 @@ void finish_collecting(int unused)
     events_collector.disable_collection(true);
     events_collector.clear_events();
 
-    kill(pid_benchmark, SIGUSR1);
-
-    // std::cout << "Time running: " << final_pmu_values[final_pmu_values.size() - 2] << std::endl;
-    // std::cout << "Time enabled: " << final_pmu_values[final_pmu_values.size() - 1] << std::endl;
-    // std::cout << "PMU counters stats:" << std::endl;
+    // If this function was triggered before fork(), killing -1 calls
+    // kernel panic in gem5
+    if (pid_benchmark != -1)
+        kill(pid_benchmark, SIGUSR1);
 
     for (size_t i = 0; i < final_pmu_values.size() - 1; ++i) {
-    //     std::cout << "\t0x" << std::hex << events[i].perf_id << std::dec << ": " <<
-    //         final_pmu_values[i] << std::endl;
         std::cout << final_pmu_values[i] << ",";
     }
 
