@@ -1,0 +1,28 @@
+\documentclass[a4paper, openany, 12pt]{article}
+
+%% Required GOST style
+\bibliographystyle{ugost2008l}
+
+\input{include/preambule.tex}
+
+\begin{document}
+    \input{include/title.tex}
+    \input{parts/Annotation.tex}
+
+    \tableofcontents{}
+    \newpage
+
+    \input{parts/Section0.tex} %% Введение
+    \input{parts/Section1.tex} %% Постановка задачи
+    \input{parts/Section2.tex} %% Обзор существующих решений
+    \input{parts/Section3.tex} %% Исследование и построение решения задачи
+    \input{parts/Section4.tex} %% Описание практической части
+    \input{parts/Section5.tex} %% Заключение
+
+    %% Don't change the following lines
+    \nocite{*}
+    \bibliography{literature}
+
+    \newpage
+    \input{parts/Appendix.tex}
+\end{document}

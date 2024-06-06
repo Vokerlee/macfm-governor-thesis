@@ -35,3 +35,12 @@ binaries
 *.exe
 *.out
 *.app
+
+# LaTeX files
+*.snm
+*.log
+*.bcf
+*.vrb
+*.aux
+*.nav
+*.toc
