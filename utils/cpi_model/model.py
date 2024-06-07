@@ -11,8 +11,8 @@ from matplotlib.ticker    import MaxNLocator
 matplotlib.rcParams['axes.formatter.limits'] = (-5, 4)
 
 MAX_LOCATOR_NUMBER = 10
-FIGURE_XSIZE = 10
-FIGURE_YSIZE = 8
+FIGURE_XSIZE = 8
+FIGURE_YSIZE = 6
 
 BACKGROUND_RGB = '#F5F5F5'
 MAJOR_GRID_RGB = '#919191'
@@ -92,7 +92,7 @@ def main(args):
         l3pi_values.append(get_avg_pmu(dfs[benchmarks[i]], "l3pi"))
         l2pi_values.append(get_avg_pmu(dfs[benchmarks[i]], "l2pi"))
     hsv = plt.get_cmap('hsv')
-    colors = hsv(np.array(l2pi_values) / np.max(l2pi_values) - np.array(l3pi_values) / np.max(l2pi_values))
+    colors = hsv(np.array(l3pi_values) / np.max(l3pi_values))
 
     for i in range(len(benchmarks)):
         bencmark_name = benchmarks[i].split("/")[-1]
@@ -114,12 +114,12 @@ def main(args):
     get_cpi_model_params(np.array(l2pi_values), np.array(l3pi_values),
                          np.array(linear_coeffs), np.array(benchmarks))
 
-    axes.set_xlabel('CPU frequency, kHz')
-    axes.set_ylabel('CPI')
+    axes.set_xlabel('$freq_{CPU}$, кГц')
+    axes.set_ylabel('$cpi$')
 
-    axes.set_title('CPI dependence within CPU frequency (HPI, 1 core)')
+    axes.set_title('Зависимость отношения тактов на инструкцию ($cpi$) от частоты ядра ЦП')
 
-    figure.legend(loc="upper right", fontsize="8")
+    # figure.legend(loc="upper right", fontsize="8")
     figure.savefig('cpi.png')
 
 if __name__ == "__main__":
