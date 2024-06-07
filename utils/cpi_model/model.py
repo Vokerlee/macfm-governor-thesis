@@ -65,7 +65,7 @@ def get_cpi_model_params(l2pi_values, l3pi_values, linear_coeffs, benchmarks):
 
     linear_reg = LinearRegression(fit_intercept=False).fit(
         np.swapaxes(np.array([l2pi_values - l3pi_values, l3pi_values]), 0, 1), linear_coeffs)
-    print(linear_reg.coef_)
+    print(np.array(linear_reg.coef_) * 1024 * 1024)
 
     for i in range(len(benchmarks)):
         axes.scatter(l2pi_values[i] - l3pi_values[i], l3pi_values[i], linear_coeffs[i], label=benchmarks[i], color=colors[i])

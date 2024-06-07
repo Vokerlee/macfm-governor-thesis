@@ -35,8 +35,7 @@
 \definecolor{lightgreen}{HTML}{90EE90}
 \newcommand{\boxedeq}[2]{\begin{empheq}[box={\fboxsep=6pt\fbox}]{align}\label{#1}#2\end{empheq}}
 \newcommand{\coloredeq}[2]{\begin{empheq}[box=\colorbox{lightgreen}]{align}\label{#1}#2\end{empheq}}
-\newcommand{\highlight}[1]{%
-  \colorbox{red!40}{$\displaystyle#1$}}
+\newcommand{\highlight}[1]{\colorbox{red!40}{$\displaystyle#1$}}
 
 \definecolor{babyblue}{rgb}{0.54, 0.81, 0.94}
 \definecolor{babypink}{rgb}{0.96, 0.76, 0.76}
@@ -48,17 +47,16 @@
 \definecolor{corn}{rgb}{0.98, 0.93, 0.36}
 \definecolor{jonquil}{rgb}{0.98, 0.85, 0.37}
 \definecolor{bananayellow}{rgb}{1.0, 0.88, 0.21}
-\newcommand{\bert}{\ensuremath{%
-  \mathchoice{\includegraphics[height=2ex]{Bert-pic-removebg-preview.png}}
-    {\includegraphics[height=2ex]{Bert-pic-removebg-preview.png}}
-    {\includegraphics[height=1.5ex]{Bert-pic-removebg-preview.png}}
-    {\includegraphics[height=1ex]{Bert-pic-removebg-preview.png}}
+\newcommand{\bert}{\ensuremath{
+    \mathchoice{\includegraphics[height=2ex]{Bert-pic-removebg-preview.png}}
+        {\includegraphics[height=2ex]{Bert-pic-removebg-preview.png}}
+        {\includegraphics[height=1.5ex]{Bert-pic-removebg-preview.png}}
+        {\includegraphics[height=1ex]{Bert-pic-removebg-preview.png}}
 }}
 
 \useoutertheme{infolines}
 
 \usepackage{courier}
-%\usepackage{animate}
 \usepackage{expl3}
 %\usepackage[listings,theorems]{tcolorbox}
 
@@ -89,7 +87,7 @@
 \end{beamercolorbox}
 }
 \makeatletter
-\newcommand\SoulColor{%
+\newcommand\SoulColor{
   \let\set@color\beamerorig@set@color
   \let\reset@color\beamerorig@reset@color}
 \makeatother
@@ -102,45 +100,45 @@
   \colorbox{blue!40}{$\displaystyle#1$}}
 
 \newenvironment<>{problock}[1]{%
-  \begin{actionenv}#2%
-      \def\insertblocktitle{#1}%
-      \par%
-      \mode<presentation>{%
-       % \setbeamercolor{block title}{fg=white,bg=orange!20!black}
-        %\setbeamercolor{block title}{fg=white,bg=red!10!black}
-        \setbeamercolor{block title}{fg=white,bg=babyblue}
-       \setbeamercolor{block body}{fg=black,bg=white!50}
-       \setbeamercolor{itemize item}{fg=orange!20!black}
-       \setbeamertemplate{itemize item}[triangle]
-     }%
-      \usebeamertemplate{block begin}
-    \par\usebeamertemplate{block end}
-    \end{actionenv}
-    }
+    \begin{actionenv}#2%
+        \def\insertblocktitle{#1}%
+        \par%
+        \mode<presentation>{%
+        % \setbeamercolor{block title}{fg=white,bg=orange!20!black}
+          %\setbeamercolor{block title}{fg=white,bg=red!10!black}
+          \setbeamercolor{block title}{fg=white,bg=babyblue}
+        \setbeamercolor{block body}{fg=black,bg=white!50}
+        \setbeamercolor{itemize item}{fg=orange!20!black}
+        \setbeamertemplate{itemize item}[triangle]
+      }%
+        \usebeamertemplate{block begin}
+      \par\usebeamertemplate{block end}
+      \end{actionenv}
+      }
 
-    \newcommand<>{\uncovergraphics}[2][{}]{
-    % Taken from: <https://tex.stackexchange.com/a/354033/95423>
-    \begin{tikzpicture}
-    \node[anchor=south west,inner sep=0] (B) at (4,0)
-        {\includegraphics[#1]{#2}};
-    \alt#3{}{%
-        \fill [draw=none, fill=background, fill opacity=0.9] (B.north west) -- (B.north east) -- (B.south east) -- (B.south west) -- (B.north west) -- cycle;
-    }
-    \end{tikzpicture}
+      \newcommand<>{\uncovergraphics}[2][{}]{
+      % Taken from: <https://tex.stackexchange.com/a/354033/95423>
+      \begin{tikzpicture}
+      \node[anchor=south west,inner sep=0] (B) at (4,0)
+          {\includegraphics[#1]{#2}};
+      \alt#3{}{%
+          \fill [draw=none, fill=background, fill opacity=0.9] (B.north west) -- (B.north east) -- (B.south east) -- (B.south west) -- (B.north west) -- cycle;
+      }
+      \end{tikzpicture}
 }
 
 \newlength\dlf
 \newcommand\alignedbox[3][yellow]{
-  % #1 = color (optional, defaults to yellow)
-  % #2 = before alignment
-  % #3 = after alignment
-  &
-  \begingroup
-  \settowidth\dlf{$\displaystyle #2$}
-  \addtolength\dlf{\fboxsep+\fboxrule}
-  \hspace{-\dlf}
-  \fcolorbox{red}{#1}{$\displaystyle #2 #3$}
-  \endgroup
+    % #1 = color (optional, defaults to yellow)
+    % #2 = before alignment
+    % #3 = after alignment
+    &
+    \begingroup
+    \settowidth\dlf{$\displaystyle #2$}
+    \addtolength\dlf{\fboxsep+\fboxrule}
+    \hspace{-\dlf}
+    \fcolorbox{red}{#1}{$\displaystyle #2 #3$}
+    \endgroup
 }
 
 \usepackage{collcell}
@@ -156,6 +154,7 @@
   }
 
 \usepackage{pgfpages}
+\graphicspath{{images/}}
 
 %% Important
 %%% show note or disable note.
@@ -276,7 +275,6 @@
 
 \begin{frame}[plain]{Содержание}
 \tableofcontents[]
-\note[item]{note here }
 \end{frame}
 
 % =========================================
@@ -284,193 +282,110 @@
 \section{Введение}
 
 \begin{frame}{Введение}
-    Este \textit{tamplate} é feito com a logo oficial da FAENG-UFMT. É uma versão modificada do \textit{tamplate}
-    da Universidade Politécnica da Catalunha (UPC). \href{https://www.overleaf.com/latex/templates/upc-beamer-template/wywdgpnbstkw}{\beamergotobutton{Link}}
+    \begin{enumerate}
+      \item Производительность современных ЦП ограничена скоростью системы памяти.
+      \item Память: несколько уровней кешей и ОЗУ.
+      \item Современные ОС (Linux, FreeBSD) не учитывают задержки памяти при регулировании
+          частот процессора и планировании задач.
+      \item Производительность и энергопотребление ЦП в зависимости от политики регулирования частот
+          для приложений реального времени.
+      \item Эмуляция поведения компьютерных архитектур с помощью Gem5 как средство создания моделей производительности ЦП.
 
-    \vspace{1cm}
-
-    Para aprender a construir apresentações em LaTeX, veja o seguinte tutorial:
-    \href{https://www.overleaf.com/learn/latex/Beamer_Presentations\%3A_A_Tutorial_for_Beginners_(Part_1)\%E2\%80\%94Getting_Started}{\beamergotobutton{Link}}
+    \end{enumerate}
 \end{frame}
 
-% =========================================
-
-% \section{FFF}
-
-% \begin{frame}{Figura 2}
-%     \begin{figure}
-%         \centering
-%         \includegraphics[width=6.5cm]{Beamer/figs/teste.png}
-%         \caption{Figura gerada por Inteligência Artificial}
-%         \label{fig:AIimage}
-%     \end{figure}
-% \end{frame}
-
-% =========================================
-
-\begin{frame}{Tabelas}
-    \begin{table}[]
+\begin{frame}{Введение: пример организации памяти}
+    \begin{figure}
         \centering
-        \begin{tabular}{|c|c|c|}
-            \hline
-            Modelo & Acurácia \\
-            \hline
-            SVM & 0.88 \\
-            \textit{k}-NN & 0.80 \\
-            Naive Bayes & 0.83 \\
-            MLP & 0.95 \\
-            \hline
-        \end{tabular}
-        \caption{Exemplo de Tabela}
-        \label{tab:my_label}
-    \end{table}
+        \includegraphics[width=6.5cm]{MulticoreCacheRU.png}
+        \caption{Пример организации памяти в многоядерном устройстве}
+        \label{pic:cache_pyramid}
+    \end{figure}
 \end{frame}
 
 % =========================================
 
-% \begin{frame}{Listagem}
-%     Listagem de itens com \textit{itemize}:
-%     \begin{itemize}
-%         \item Item 1
-%         \item Item 2
-%         \item Item 3
-%     \end{itemize}
-%     \vspace{1cm}
-%     Listagem de itens com \textit{enumerate}:
-%     \begin{enumerate}
-%         \item Item 1
-%         \item Item 2
-%         \item Item 3
-%     \end{enumerate}
-% \end{frame}
+\section{Цели и задачи}
+
+\begin{frame}{Цели работы}
+    \begin{enumerate}
+      \item Разработать механизмы, позволяющие организовать сбор статистики микроархитектурных
+          событий ядер ЦП (центрального процессора) при различных тактовых частотах.
+      \item Разработать модель производительности ядер ЦП с учётом поведения и характеристик
+          устройств памяти (кеши, ОЗУ).
+      \item Реализовать политику регулирования частот ядер ЦП в ОС Linux в пространстве ядра,
+          используя разработанную модель.
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}{Задачи}
+    \begin{enumerate}
+        \item Реализовать в операционной системе Linux (версии 6.1):
+        \begin{enumerate}
+            \item Набор драйверов, позволяющих изменять тактовые частоты ЦП в эмулируемой системе
+                архитектурным симулятором Gem5.
+            \item Возможность сбора статистики микроархитектурных событий ядер ЦП, связанных с работой
+                кешей, для архитектуры ARM64.
+        \end{enumerate}
+        \item Разработать модель производительности ядер ЦП:
+        \begin{enumerate}
+            \item Спроектировать теоретическую модель производительности ЦП.
+            \item Реализовать набор приложений, подходящих для построенной модели, и собрать для них
+                статистику микроархитектурных событий при различных частотах ЦП.
+            \item Найти коэффициенты модели на основе снятых данных.
+        \end{enumerate}
+        \item Реализовать политику регулирования частот ядер ЦП в ОС Linux в пространстве ядра,
+            используя разработанную модель.
+    \end{enumerate}
+\end{frame}
 
 % =========================================
 
-% \begin{frame}{Blocos}
-%     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam eget ligula eu lectus lobortis condimentum. Aliquam nonummy auctor massa.
+\section{Обзор существующих решений}
 
-%     \begin{alertblock}{Bloco}
-%         Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Nulla at risus.
-%     \end{alertblock}
-
-%     Quisque purus magna, auctor et, sagittis ac, posuere eu, lectus. Nam mattis, felis ut adipiscing.
-% \end{frame}
+\begin{frame}{Обзор существующих решений}
+    \begin{enumerate}
+      \item Что-нибудь про то, что в линукс (взять из тезиса).
+    \end{enumerate}
+\end{frame}
 
 % =========================================
 
-% \begin{frame}{Notação Matemática}
-%     \begin{alertblock}{Distribuição Normal}
-%         \begin{equation*}
-%         f(x) = \frac{1}{\sigma\sqrt{2 \pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}
-%         \end{equation*}
-%     \end{alertblock}
+\section{Исследование и построение решения}
 
-%     \begin{alertblock}{Transformada de Fourier Discreta}
-%         \begin{equation*}
-%         X(\omega) = \sum^{L-1}_{n=0} x_n e^{-i\omega n}, \quad x \in \mathbb{R}^L
-%         \end{equation*}
-%     \end{alertblock}
-% \end{frame}
+\begin{frame}{Исследование и построение решения}
+    \begin{enumerate}
+      \item Сюда cpi формулу с параллелизмом памяти.
+      \item Куча пунктов почему она мега-хороша (обощённость).
+    \end{enumerate}
+\end{frame}
 
 % =========================================
 
-% \begin{frame}{Algoritmos}
-%     Algoritmo \textit{Selection Sort}, que ordena um vetor $x\in\mathbb{R}^N$ em tempo $\mathcal{O}(N^2)$:
+\section{Практическая часть}
 
-%     \vspace{0.5cm}
-
-%     \begin{algorithmic}
-%         \For{$i \in [0,...,N-1]$}
-%             \State $m \gets i$
-%             \For{$j \in [i+1,...,N-1]$}
-%                 \If{$x_j < x_m$}
-%                     \State $m \gets j$
-%                 \EndIf
-%             \EndFor
-%             \If{$x_i \neq x_m$}
-%                 \State $a \gets x_i$
-%                 \State $x_i \gets x_m$
-%                 \State $x_m \gets a$
-%             \EndIf
-%         \EndFor
-%     \end{algorithmic}
-% \end{frame}
-
-% =========================================
-
-% \begin{frame}[fragile]{Código-fonte}
-%     Código-fonte do algoritmo \textit{Selection Sort} em Python:
-
-%     \begin{verbatim}
-% lista = [3,2,1]
-% for i in range(len(lista)):
-%     menor = i
-%     for j in range(i+1,len(lista)):
-%         if lista[j] < lista[menor]:
-%                 menor = j
-%     if lista[i] != lista[menor]:
-%             aux = lista[i]
-%             lista[i] = lista[menor]
-%             lista[menor] = aux
-% print(lista)
-%     \end{verbatim}
-
-%     \alert{Utilize ``fragile'' ao invés de ``plain'' ao definir um \textit{frame} que contém um \textit{verbatim}}
-% \end{frame}
-
-% \section{Citações}
-
-% \begin{frame}{Citação indireta}
-
-%     \textbf{Exemplo 1}
-
-%     \justify
-%     Quando existem alegações que contradizem conhecimentos bem consolidados, devem haver evidências criteriosamente inspecionadas e fortes o suficiente para que sejam abandonadas as evidências que já estavam estabelecidas \cite{sagan-1980}.
-
-%     \textbf{Exemplo 2}
-
-%     Segundo \citeauthor{sagan-1980} (\citeyear{sagan-1980}) \cite{sagan-1980}, quando existem alegações que contradizem conhecimentos bem consolidados, devem haver evidências criteriosamente inspecionadas e fortes o suficiente para que sejam abandonadas as evidências que já estavam estabelecidas.
-
-% \end{frame}
-
-% \begin{frame}{Citação direta}
-
-%     \textbf{Citação direta curta}
-
-%     Segundo \citeauthor{sagan-1980} (\citeyear{sagan-1980}) \cite{sagan-1980}, ''Alegações extraordinárias requerem evidências extraordinárias''.
-%     \\
-
-%     \textbf{Citação direta longa}\\
-
-%     \begin{quote}
-%         ''Quando expostas à luz ultravioleta as moléculas orgânicas que constituem oda a vida sobre a Terra se desfazem ou formam ligações químicas nocivas. Entre os seres que habitam os oceanos, os mais difundidos são minúsculas plantas unicelulares que flutuam perto da superfície da água — os fitoplanctons.'' \cite{sagan1998bilhoes}
-%     \end{quote}
-
-% \end{frame}
-
-% =========================================
+\begin{frame}{Практическая часть}
+    \begin{enumerate}
+      \item Что-нибудь про драйверы clk, cpufreq
+      \item Про бенчмарки, 3D график с данными => вывод про динамику.
+      \item Что-нибудь про места вставок permut tracking, scheduler tick, migrations, context switches.
+    \end{enumerate}
+\end{frame}
 
 \section{Заключение}
+
+\begin{frame}{Результаты}
+    \begin{enumerate}
+      \item Что-нибудь про выиграш в перфе.
+    \end{enumerate}
+\end{frame}
 
 % =========================================
 
 \begin{frame}
     \begin{center}
-    \Huge \textcolor{faeng_blue}{Obrigado!}
+    \Huge \textcolor{faeng_blue}{Благодарю за внимание!}
     \end{center}
 \end{frame}
 
-% =========================================
-
-\section{Библиография}
-
-\begin{frame}{Библиография}
-    %\bibliography{Beamer/referencias}
-    \printbibliography
-\end{frame}
-
-
 \end{document}
-% =============================================================
-% =========================== END =============================
-% =============================================================
