@@ -308,7 +308,7 @@
     существует кеш строки, который значительно влияет на скорость обращения
     к ячейке памяти, т.е. локальность обращения к ячейкам DDR памяти очень важна).
 
-    В качестве упрощения примем $\alpha_{L_2}^{par} = \alpha_{ram}^{par} \equiv \alpha^{par}$ полагая,
+    В качестве упрощения примем $\alpha_{L_2}^{par} = \alpha_{ram}^{par} \equiv \alpha^{par}$, полагая,
     что коэффициенты параллелизма обращений в кеш последнего уровня (2-ого) и ОЗУ коррелируют.
 
     Финальная формула:
@@ -386,11 +386,11 @@
     \end{equation}
 
     \begin{equation}
-        npi_{L_2} = \frac{L1I\_CACHE\_REFILL + L1D\_CACHE\_REFILL}{INST\_RETIRED},
+        npi_{ram} = \frac{L2D\_CACHE\_REFILL}{INST\_RETIRED}.
     \end{equation}
 
     \begin{equation}
-        npi_{ram} = npi_{L_2} - \frac{L2D\_CACHE\_REFILL}{INST\_RETIRED}.
+        npi_{L_2} = \frac{L1I\_CACHE\_REFILL + L1D\_CACHE\_REFILL}{INST\_RETIRED} - npi_{ram},
     \end{equation}
 
     Заметим, что чаще всего в современных мобильных системах на архитектуре ARM64 после последнего
@@ -412,7 +412,196 @@
 
 \subsection{Способ применения модели производительности ядра процессора в ядре Linux}
 
-    TBD
+    В этой главе будут использоваться термины утилизации, введённые в главе \ref{linux_util}.
+
+    Для применения описанной ранее модели производительности, необходимо разработать формулы для
+    вычислений следующих значений:
+    \begin{enumerate}
+        \item Утилизация потока исполнения на основе утилизации ядерного времени этим потоком за
+        фиксированный промежуток времени.
+        \item Тактовая частота, которую необходимо выставить, на основе значения подсчитанной
+        утилизации (или утилизаций за несколько промежутков времени).
+    \end{enumerate}
+
+\subsubsection{Вычисление утилизации потока исполнения}
+
+    По определению утилизацию потока исполнения -- часть ёмкости производительности,
+    использованной при заданной утилизации ядерного времени, а
+    ёмкость производительности -- количество исполненных инструкций в единицу времени при заданной
+    тактовой частоте при условии максимальной утилизации ядерного времени (см. \ref{linux_util}).
+
+    Пусть $\tau$ -- величина промежутка времени, за которую будет подсчитана утилизация потока исполнения.
+    Рассмотрим для упрощения только 1 ядро процессора. Тогда, согласно определениям, приведённым выше,
+    справедливо
+
+    \begin{equation}
+        util = 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{instrs / s}{(instrs / s) |_{freq_{cpu} = freq_{cpu}^{max}}} =
+            1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{instrs}{(instrs) |_{freq_{cpu} = freq_{cpu}^{max}}}
+    \end{equation}
+    где $\Delta t$ -- время активной работы ядра процессора, $\frac{\Delta t}{\tau}$ -- утилизация ядерного
+    времени, $instrs / s$ -- количество выполняемых инструкций в единицу времени при заданной тактовой
+    частоте, а $(instrs / s) |_{freq_{cpu} = freq_{cpu}^{max}}$ -- максимально возможное для
+    рассматриваемой рабочей нагрузки значение выполняемых инструкций в единицу времени, достигаемое
+    повышением тактовой частоты ядра до своего максимального значения.
+
+    % Заметим, что величины $instrs$ и $(instrs) |_{freq_{cpu} = freq_{cpu}^{max}}$ рассматриваются для одинакового
+    % промежутка времени, и $(instrs) |_{freq_{cpu} = freq_{cpu}^{max}}$ несёт за собой смысл количества инструкций,
+    % которые были бы исполнены ядром процессора за то же количество тактов, на при максимальной тактовой частоте.
+    % Значит справедливо выражение
+
+    % \begin{equation}
+    %     util = 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{ipc}{(ipc) |_{freq_{cpu} = freq_{cpu}^{max}}}
+    % \end{equation}
+
+    Заметим, что
+
+    \begin{equation}
+        instrs / s = \frac{instrs}{cycles} \cdot \frac{cycles}{s} = \frac{1}{cpi} \cdot freq_{cpu} =
+        \frac{freq_{cpu}}{cpi},
+    \end{equation}
+    тогда формула утилизации принимает следующий вид:
+
+    \begin{equation} \label{util_general_cpi}
+        util = 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{\frac{freq_{cpu}}{cpi}}{\left( \frac{freq_{cpu}}{cpi} \right)
+            \bigg|_{freq_{cpu} = freq_{cpu}^{max}}} = 1024 \cdot \frac{\Delta t}{\tau} \cdot
+            \frac{freq_{cpu}}{freq_{cpu}^{max}} \cdot \frac{cpi |_{freq_{cpu} = freq_{cpu}^{max}}}{cpi}.
+    \end{equation}
+
+    Возникший множитель $\frac{cpi |_{freq_{cpu} = freq_{cpu}^{max}}}{cpi}$ явно предполагался равным единице
+    в решении, описанном в главе \ref{linux_util}, в формуле \eqref{util_linux_formula}.
+
+    Подставив формулу модели производительности \eqref{cpi_formula} в формулу \eqref{util_general_cpi},
+    а также обозначив $lat_{gen} = \alpha^{par} \cdot \left( C_{L_2} \cdot npi_{L_2} + C_{ram} \cdot npi_{ram} \right)$,
+    получим:
+
+    \begin{equation} \label{util_formula_final}
+        util = 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{freq_{cpu}}{freq_{cpu}^{max}} \cdot
+            \frac{cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}^{max}}
+                 {cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}}.
+    \end{equation}
+
+    Если $cpi_{cpu}^{L_1} \ll lat_{gen} \cdot freq_{cpu}$, то
+
+    \begin{equation}
+        util \approx 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{freq_{cpu}}{freq_{cpu}^{max}} \cdot
+            \frac{lat_{gen} \cdot freq_{cpu}^{max}} {lat_{gen} \cdot freq_{cpu}} =
+            1024 \cdot \frac{\Delta t}{\tau},
+    \end{equation}
+    то есть утилизация перестаёт зависеть от частоты ядра процессора,
+    что и следовало ожидать.
+
+    Если $cpi_{cpu}^{L_1} \gg lat_{gen} \cdot freq_{cpu}$, то есть вклад тактов, затраченных на ожидание
+    обращений в память, мал по сравнению с остальным числом тактов, то
+
+    \begin{equation}
+        util \approx 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{freq_{cpu}}{freq_{cpu}^{max}} \cdot
+            \frac{cpi_{cpu}^{L_1}} {cpi_{cpu}^{L_1}} = 1024 \cdot \frac{\Delta t}{\tau} \cdot
+            \frac{freq_{cpu}}{freq_{cpu}^{max}},
+    \end{equation}
+    то есть формула совпадает с формулой \eqref{util_linux_formula}, использованной в ядре Linux.
+
+    Рассмотрим теперь более общий случай, когда тактовая частота в одном промежутке времени $\tau$
+    не фиксирована, как предполагалось до этого (см. формулу \eqref{util_formula_final}), а может
+    изменяться. Пусть $i$ -- номер подынтеравала, на котором процессор был активен и его тактовая
+    частота равнялась $freq_{cpu, i}$.
+
+    \begin{equation}
+        util = 1024 \cdot \frac{\Delta t}{\tau} \cdot
+            \frac{\langle instrs / s \rangle_t }{ \langle (instrs / s) |_{freq_{cpu, i} = freq_{cpu}^{max}} \rangle_t},
+            \; \Delta t = \sum \limits_i \Delta t_i.
+    \end{equation}
+
+    \begin{equation}
+        util = 1024 \cdot \frac{\sum \limits_i \Delta t_i}{\tau} \cdot
+            \frac{\frac{1}{\tau} \sum \limits_i (instrs / s)_i \cdot \Delta t_i}
+                 {\frac{1}{\tau} \sum \limits_i (instrs / s)_i \cdot \Delta t_i |_{freq_{cpu, i} = freq_{cpu}^{max}}} =
+    \end{equation}
+
+    \begin{equation*}
+        = 1024 \cdot \frac{\Delta t}{\tau} \cdot
+        \frac{\sum \limits_i \frac{instrs_i}{\Delta t_i} \cdot \Delta t_i}
+             {\sum \limits_i (\frac{instrs_i}{\Delta t_i} \cdot \Delta t_i) |_{freq_{cpu, i} = freq_{cpu}^{max}}} =
+        1024 \cdot \frac{\Delta t}{\tau} \cdot
+        \frac{\sum \limits_i instrs_i}
+             {\sum \limits_i instrs_i |_{freq_{cpu, i} = freq_{cpu}^{max}}}.
+    \end{equation*}
+
+    \begin{equation}
+        \frac{instrs_i |_{freq_{cpu, i} = freq_{cpu}^{max}}}{instrs_i} =
+            \frac{(\frac{freq_{cpu}}{cpi}) |_{freq_{cpu} = freq_{cpu}^{max}}}{\frac{freq_{cpu, i}}{cpi_i}} =
+            \frac{freq_{cpu}^{max}}{freq_{cpu, i}} \cdot \frac{cpi_i}{cpi |_{freq_{cpu, i} = freq_{cpu}^{max}}} =
+    \end{equation}
+
+    \begin{equation*}
+        = \frac{freq_{cpu}^{max}}{freq_{cpu, i}} \cdot \frac{cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}^{max}}
+            {cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu, i}},
+    \end{equation*}
+    откуда можно получить финальную для утилизации:
+
+    \begin{equation} \label{util_sum_final}
+        util = 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{\sum \limits_i instrs_i}
+            {\sum \limits_i instrs_i \cdot \frac{freq_{cpu}^{max}}{freq_{cpu, i}} \cdot
+            \frac{cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}^{max}}{cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu, i}}}.
+    \end{equation}
+
+\subsubsection{Выбор тактовой частоты ядра процессора}
+
+    Выбор тактовой частоты основывается на посчитанной утилизации по формуле \eqref{util_sum_final}.
+    Предположим, что за промежуток времени $\tau$ ядро процессора было активным время $\Delta t < \tau$.
+    Смысл регулирования тактовой частоты заключается в том, что если $\Delta t$ не сильно близко к
+    значению $\tau$, то тактовую частоту можно понизить так, чтобы $\Delta t$ всё ещё оставалось меньшим
+    величины $\tau$, т.е. чтобы приложение всё ещё успевало выполнять требуемую работу.
+
+    Если $\Delta t > \tau$ на текущей тактовой частоте, то, как минимум, тактовую частоту требуется повышать,
+    но насколько повышать -- аналитически выявить невозможно, поэтому предлагается следующий алгоритм:
+    если такая ситуация произошла только 1 раз, тактовая частота повышается на $n$ уровней (возможные
+    значения тактовых частот всегда дискретны), если после этого она произошла ещё раз, то тактовая частота
+    повышается до максимально возможного значения.
+
+    Чтобы ситуация $\Delta t > \tau$ происходила более редко, предлагается так же, как и решениях,
+    описанных в главе \ref{linux_util}, выставлять тактовую частоту с запасом по утилизации, то есть
+    условие выбора тактовой частоты $\Delta t < \tau$ заменяется на $\Delta t < \gamma \cdot \tau$,
+    $\gamma < 1$. Часто выбирают $\gamma = 0.8$, но выбор такого значения лучше подбирать под использование
+    конкретных рабочих нагрузок (приложений).
+
+    Величина $\Delta t$ в условии $\Delta t < \gamma \cdot \tau$ выражается через параметры модели
+    производительности, посчитанной утилизации и тактовой частоты процессора, откуда и извлекается минимальное
+    значение тактовой частоты для соблюдения данного условия (неравенства). Тактовая частота находится из
+    предположения, что в следующий промежуток времени $\tau$ утилизация $util$ приложения останется
+    такой же (как посчитанное значение), а тактовая частота выбирается полностью на весь промежуток времени,
+    поэтому необходимо использовать формулу утилизации \eqref{util_formula_final}:
+
+    \begin{equation}
+        util = 1024 \cdot \frac{\Delta t}{\tau} \cdot \frac{freq_{cpu}}{freq_{cpu}^{max}} \cdot
+            \frac{cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}^{max}}
+                 {cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}}, \; \frac{\Delta t}{\tau} < \gamma \Rightarrow
+    \end{equation}
+
+    \begin{equation}
+        \Rightarrow \frac{util}{1024} \cdot \frac{freq_{cpu}^{max}}{freq_{cpu}} \cdot
+        \frac{cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}}
+             {cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}^{max}} < \gamma \; (\gamma < 1) \Rightarrow
+    \end{equation}
+
+    \begin{equation} \label{optimal_cpufreq}
+        \Rightarrow freq_{cpu} > \frac{\tilde{util} \cdot freq_{cpu}^{max} \cdot cpi_{cpu}^{L_1}}
+        {cpi_{cpu}^{L_1} + lat_{gen} \cdot freq_{cpu}^{max} \cdot (1 - \tilde{util})}, \;
+        \text{где} \; \tilde{util} = \frac{util}{1024 \cdot \gamma}
+    \end{equation}
+
+    % расммотреть граничные случаи
+
+    Таким образом, тактовая частота ядра процессора на следующий промежуток времени выбирается исходя
+    из формулы \eqref{optimal_cpufreq}. Напомним, что
+
+    \begin{equation*}
+        lat_{gen} = \alpha^{par} \cdot \left( C_{L_2} \cdot npi_{L_2} + C_{ram} \cdot npi_{ram} \right),
+    \end{equation*}
+    и что величина $lat_{gen}$ ...
+
+    % алгоритм регулировки параметров
+
+
 
 % \subsection{Реализация модели в планировщике ядра Linux}
 
