@@ -11,10 +11,11 @@ from matplotlib.ticker    import MaxNLocator
 matplotlib.rcParams['axes.formatter.limits'] = (-5, 4)
 
 MAX_LOCATOR_NUMBER = 10
-FIGURE_XSIZE = 8
+FIGURE_XSIZE = 9
 FIGURE_YSIZE = 6
 
-BACKGROUND_RGB = '#F5F5F5'
+# BACKGROUND_RGB = '#F5F5F5'
+BACKGROUND_RGB = '#FFFFFF'
 MAJOR_GRID_RGB = '#919191'
 
 LEGEND_FRAME_ALPHA = 0.95
@@ -57,7 +58,7 @@ def get_cpi_model_params(l2pi_values, l3pi_values, linear_coeffs, benchmarks):
     assert(len(l2pi_values) == len(linear_coeffs))
 
     hsv = plt.get_cmap('hsv')
-    colors = hsv(l3pi_values / np.max(l3pi_values))
+    colors = hsv(linear_coeffs / np.max(linear_coeffs))
 
     figure = plt.figure(figsize=(FIGURE_XSIZE, FIGURE_YSIZE), facecolor=BACKGROUND_RGB)
     axes = figure.add_subplot(projection='3d')
@@ -66,20 +67,23 @@ def get_cpi_model_params(l2pi_values, l3pi_values, linear_coeffs, benchmarks):
     linear_reg = LinearRegression(fit_intercept=False).fit(
         np.swapaxes(np.array([l2pi_values - l3pi_values, l3pi_values]), 0, 1), linear_coeffs)
     print(np.array(linear_reg.coef_) * 1024 * 1024)
+    print(np.array(linear_reg.coef_))
 
     for i in range(len(benchmarks)):
-        axes.scatter(l2pi_values[i] - l3pi_values[i], l3pi_values[i], linear_coeffs[i], label=benchmarks[i], color=colors[i])
+        axes.scatter(l2pi_values[i] - l3pi_values[i], l3pi_values[i], linear_coeffs[i], label=benchmarks[i])
 
     X, Y = np.meshgrid(l2pi_values - l3pi_values, l3pi_values)
     axes.plot_wireframe(X, Y, linear_reg.coef_[0] * X + linear_reg.coef_[1] * Y)
 
-    plt.legend()
-    plt.show()
+    axes.set_ylabel("$npi_{ram}$", fontsize=14)
+    axes.set_xlabel("$npi_{L_3}$", fontsize=14)
+    axes.set_zlabel("$lat_{gen}$", fontsize=14)
 
 def main(args):
     benchmarks, dfs = get_dfs_from_file(args.file)
 
     figure = plt.figure(figsize=(FIGURE_XSIZE, FIGURE_YSIZE), facecolor=BACKGROUND_RGB)
+    figure.text(0.14, 0.82, "Цвет соответствует значению коэффициента наклона", fontsize=13)
     gs = GridSpec(ncols=1, nrows=1, figure=figure)
     axes = figure.add_subplot(gs[0, 0])
     set_axis_properties(axes)
@@ -91,17 +95,25 @@ def main(args):
     for i in range(len(benchmarks)):
         l3pi_values.append(get_avg_pmu(dfs[benchmarks[i]], "l3pi"))
         l2pi_values.append(get_avg_pmu(dfs[benchmarks[i]], "l2pi"))
-    hsv = plt.get_cmap('hsv')
-    colors = hsv(np.array(l3pi_values) / np.max(l3pi_values))
 
     for i in range(len(benchmarks)):
-        bencmark_name = benchmarks[i].split("/")[-1]
         cpufreq = dfs[benchmarks[i]]['cpufreq'].to_numpy()
-        cpufreq_to_zero = np.linspace(0, np.min(cpufreq), 256)
         cpi = dfs[benchmarks[i]]['cpi'].to_numpy()
 
         linear_reg = LinearRegression().fit(cpufreq.reshape(-1, 1), cpi)
         linear_coeffs.append(linear_reg.coef_[0])
+
+    hsv = plt.get_cmap('hsv')
+    colors = hsv(0.8 * np.array(linear_coeffs) / np.max(linear_coeffs))
+
+    for i in range(len(benchmarks)):
+        bencmark_name = benchmarks[i].split("/")[-1]
+        cpufreq = dfs[benchmarks[i]]['cpufreq'].to_numpy() / 1e6
+
+        cpufreq_to_zero = np.linspace(0, np.min(cpufreq), 256)
+        cpi = dfs[benchmarks[i]]['cpi'].to_numpy()
+
+        linear_reg = LinearRegression().fit(cpufreq.reshape(-1, 1), cpi)
 
         axes.plot(cpufreq, cpi, label=f"{bencmark_name}", color=colors[i],
                   marker='o', markersize=6, linestyle='')
@@ -114,12 +126,13 @@ def main(args):
     get_cpi_model_params(np.array(l2pi_values), np.array(l3pi_values),
                          np.array(linear_coeffs), np.array(benchmarks))
 
-    axes.set_xlabel('$freq_{CPU}$, кГц')
+    axes.set_xlabel('$freq_{cpu}$, ГГц')
     axes.set_ylabel('$cpi$')
 
     axes.set_title('Зависимость отношения тактов на инструкцию ($cpi$) от частоты ядра ЦП')
 
     # figure.legend(loc="upper right", fontsize="8")
+    plt.show()
     figure.savefig('cpi.png')
 
 if __name__ == "__main__":
